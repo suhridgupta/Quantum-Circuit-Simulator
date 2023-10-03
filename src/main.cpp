@@ -33,7 +33,7 @@ int main() {
     int qubit_size = -1;
     int state_size = -1;
     while(1) {
-        cout << "quantumcpp>";
+        cout << "quantumcpp> ";
         getline(cin, input);
         vector<string> input_cmd = split_input(input);
         if(input_cmd.size() == 0) {
@@ -47,12 +47,19 @@ int main() {
         else if(command == "help") {
             cout << "Available Commands: " << "\n";
             cout << "create <size> - Creates a quantum state of <size> number of qubits." << "\n";
-            cout << "gate <X|Z|H|CNOT> ?<control> <target> - Applies an operation to the created state. <control> is an optional parameter for all gates (NOTE: CNOT must have exactly one <control> value)." << "\n";
+            cout << "gate <X|Z|H> ?<control> <target> - Applies a one qubit gate to the created state. <control> is an optional parameter for all one qubit gates." << "\n";
+            cout << "gate CNOT <control> <target> - Applies a two qubit CNOT gate to the created state." << "\n";
+            cout << "gate TOFF <control1> <control2> <target> - Applies a three qubit TOFF gate to the created state." << "\n";
             cout << "peek - View the amplitude and angles of the state." << "\n";
+            cout << "reset - Resets all the amplitudes and angles of the created state." << "\n";
             cout << "exit - Exit the quantum script." << "\n";
             continue;
         }
         else if(command == "create") {
+            if(input_cmd.size() != 2) {
+                cout << "Incorrect create command, please try again. create <size>" << "\n";
+                continue;
+            }
             qubit_size = stoi(input_cmd[1]);
             state_size = pow(2, qubit_size);
             state.resize(state_size);
@@ -115,10 +122,7 @@ int main() {
                     cout << "Incorrect number of control qubits applied, please try again." << "\n";
                     continue;
                 }
-                if(control_pos == target_pos) {
-                    cout << "Control and Target qubits cannot be the same." << "\n";
-                    continue;
-                }
+                
             }
             if(gate_type == "TOFF") {
                 if(qubit_size < 3) {
@@ -129,10 +133,10 @@ int main() {
                     cout << "Incorrect number of control qubits applied, please try again." << "\n";
                     continue;
                 }
-                if(control_pos == target_pos) {
-                    cout << "Control and Target qubits cannot be the same." << "\n";
-                    continue;
-                }
+            }
+            if(control_pos > -1 && (control_pos & target_pos)) {
+                cout << "Control and Target qubits cannot be the same." << "\n";
+                continue;
             }
             state = Q_Utils::update_state(state, gate_type, target_pos, control_pos, qubit_size, state_size);
         }

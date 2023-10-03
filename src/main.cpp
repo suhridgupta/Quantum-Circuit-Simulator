@@ -129,7 +129,7 @@ int main() {
             }
             int counter = 0;
             for(vector<ComplexNumber>::iterator i = state.begin(); i != state.end(); i++) {
-                cout << "|" << counter++ << ">: Amplitude: " << i->get_amplitude() << " Angle: " << i->get_euler_angle() << "\n";
+                cout << "|" << counter++ << ">: Amplitude: " << i->get_amplitude() << " Angle: " << i->get_euler_angle() * 180 / PI << "°" << "\n";
             }
         }
         else {

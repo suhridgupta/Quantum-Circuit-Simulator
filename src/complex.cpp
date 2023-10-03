@@ -23,7 +23,7 @@ double ComplexNumber::get_amplitude() {
 }
 
 double ComplexNumber::get_euler_angle() {
-    return atan(this->z / (0.000001+this->r));      // Delta prevents division by zero
+    return atan2(this->z, this->r);
 }
 
 ComplexNumber ComplexNumber::conjugate(ComplexNumber a) {

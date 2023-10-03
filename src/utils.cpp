@@ -23,37 +23,54 @@ namespace Q_Utils {
 
     GATE construct_gate(string gate_type, int target_pos, int control_pos, int qubit_size, int state_size) {
         GATE gate (state_size, STATE (state_size, ComplexNumber() ));
-        for(int i = 0; i < state_size; i++) {
-            int target_qubit_value = 1 & (i >> (qubit_size - target_pos - 1));
+        for(int state_iteration = 0; state_iteration < state_size; state_iteration++) {
+            // Checks if the target qubit is the selected row value or not
+            // For example, if the current state_iteration is 0b11 and the target_pos is 0b01, then the target qubit is set
+            // Another example, if the current state_iteration is 0b10 and the target_pos is 0b01, then the target qubit is not set
+            // This is used to determine whether or not to modify the cell values for one bit operations
+            bool target_qubit_set = (state_iteration & target_pos) == target_pos;
             // Calculates the corresponding target qubit toggle position
-            // For example, if the given state is |00> and the target_pos is 0, target_toggle returns |10>
+            // For example, if the current state is 0b00 and the target_pos is 0b10, target_toggle returns |10>
             // Use this to modify the cells in the gates for one bit operations
-            int target_toggle = i ^ (1 << (qubit_size - target_pos - 1));
+            int target_toggle = state_iteration ^ target_pos;
+            // Checks if the control qubits are all set or not
+            // If the gate does not have control qubits, it defaults to true
+            bool control_qubits_set = control_pos == -1 ? true : (control_pos & state_iteration) == control_pos;
+
             if(gate_type == "X") {
-                int row = i;
+                int row = state_iteration;
                 int col = target_toggle;
-                gate[row][col] = ComplexNumber(1, 0);
-            }
-            else if(gate_type == "Z") {
-                gate[i][i] = target_qubit_value ? ComplexNumber(-1, 0) : ComplexNumber(1, 0);
-            }
-            else if(gate_type == "H") {
-                if(target_qubit_value) {
-                    gate[i][target_toggle] = ComplexNumber(1/sqrt(2), 0);
-                    gate[i][i] = ComplexNumber(-1/sqrt(2), 0);
+                if(control_qubits_set) {
+                    gate[state_iteration][target_toggle] = ComplexNumber(1, 0);
                 }
                 else {
-                    gate[i][target_toggle] = ComplexNumber(1/sqrt(2), 0);
-                    gate[i][i] = ComplexNumber(1/sqrt(2), 0);
+                    gate[state_iteration][state_iteration] = ComplexNumber(1, 0);
+                }
+            }
+            else if(gate_type == "Z") {
+                gate[state_iteration][state_iteration] = control_qubits_set && target_qubit_set ? ComplexNumber(-1, 0) : ComplexNumber(1, 0);
+            }
+            else if(gate_type == "H") {
+                if(control_qubits_set) {
+                    if(target_qubit_set) {
+                        gate[state_iteration][target_toggle] = ComplexNumber(1/sqrt(2), 0);
+                        gate[state_iteration][state_iteration] = ComplexNumber(-1/sqrt(2), 0);
+                    }
+                    else {
+                        gate[state_iteration][target_toggle] = ComplexNumber(1/sqrt(2), 0);
+                        gate[state_iteration][state_iteration] = ComplexNumber(1/sqrt(2), 0);
+                    }
+                }
+                else {
+                    gate[state_iteration][state_iteration] = ComplexNumber(1, 0);
                 }
             }
             else if(gate_type == "CNOT") {
-                int control_qubit_value = 1 & (i >> (qubit_size - control_pos - 1));
-                if(control_qubit_value) {
-                    gate[i][target_toggle] = ComplexNumber(1, 0);
+                if(control_qubits_set) {
+                    gate[state_iteration][target_toggle] = ComplexNumber(1, 0);
                 }
                 else {
-                    gate[i][i] = ComplexNumber(1, 0);
+                    gate[state_iteration][state_iteration] = ComplexNumber(1, 0);
                 }
             }
 

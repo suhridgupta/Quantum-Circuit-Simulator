@@ -47,7 +47,7 @@ int main() {
         else if(command == "help") {
             cout << "Available Commands: " << "\n";
             cout << "create <size> - Creates a quantum state of <size> number of qubits." << "\n";
-            cout << "gate <X|Z|H|CNOT> ?<control> <target> - Applies an operation to the created state. <control> is an optional parameter for multi-qubit gates." << "\n";
+            cout << "gate <X|Z|H|CNOT> ?<control> <target> - Applies an operation to the created state. <control> is an optional parameter for all gates (NOTE: CNOT must have exactly one <control> value)." << "\n";
             cout << "peek - View the amplitude and angles of the state." << "\n";
             cout << "exit - Exit the quantum script." << "\n";
             continue;
@@ -65,6 +65,10 @@ int main() {
             state[0] = ComplexNumber(1, 0);
         }
         else if(command ==  "gate") {
+            if(qubit_size == -1) {
+                cout << "State not initialised, try creating the state first. create <size>"<< "\n";
+                continue;
+            }
             GATE gate;
             if(input_cmd.size() < 2) {
                 cout << "No gate provided, please try again." << "\n";
@@ -74,26 +78,47 @@ int main() {
                  cout << "No qubit provided, please try again." << "\n";
                 continue;
             }
+
             string gate_type = input_cmd[1];
-            int target_pos = -1, control_pos = -1;
+            int target_pos = 0;
+            int control_pos = -1;
+            vector<int> control_pos_arr;
+            bool control_target_error = false;
+            for(int i = 2; i < input_cmd.size() - 1; i ++) {
+                if(stoi(input_cmd[i]) >= qubit_size) {
+                    control_target_error = true;
+                    break;
+                }
+                control_pos_arr.push_back(stoi(input_cmd[i]));
+            }
+            if(control_pos_arr.size() > 0) {
+                control_pos = 0;
+                for(int i = 0; i < control_pos_arr.size(); i++) {
+                    control_pos |= 1 << (qubit_size - control_pos_arr[i] - 1);
+                }
+            }
+            if(stoi(input_cmd[input_cmd.size() - 1]) >= qubit_size) {
+                control_target_error = true;
+            }
+            if(control_target_error) {
+                cout << "Control or Target qubits are out of range. Please enter a value between 0-" << qubit_size - 1 << "." << "\n";
+                continue;
+            }
+
+            target_pos |=  1 << ( qubit_size - stoi(input_cmd[input_cmd.size() - 1]) - 1);
             if(gate_type == "CNOT") {
                 if(qubit_size < 2) {
                     cout << "Cannot apply CNOT to this state." << "\n";
                     continue;
                 }
-                control_pos = stoi(input_cmd[2]);
-                target_pos = stoi(input_cmd[3]);
+                if(control_pos_arr.size() != 1) {
+                    cout << "Incorrect number of control qubits applied, please try again." << "\n";
+                    continue;
+                }
                 if(control_pos == target_pos) {
                     cout << "Control and Target qubits cannot be the same." << "\n";
                     continue;
                 }
-            }
-            else {
-                target_pos = stoi(input_cmd[2]);
-            }
-            if(target_pos >= qubit_size || control_pos >= qubit_size) {
-                cout << "Control and Target qubits are out of range. Please enter a value between 0-" << qubit_size - 1 << "." << "\n";
-                continue;
             }
             state = Q_Utils::update_state(state, gate_type, target_pos, control_pos, qubit_size, state_size);
         }

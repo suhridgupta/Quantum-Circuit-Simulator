@@ -65,7 +65,7 @@ namespace Q_Utils {
                     gate[state_iteration][state_iteration] = ComplexNumber(1, 0);
                 }
             }
-            else if(gate_type == "CNOT") {
+            else if(gate_type == "CNOT" || gate_type == "TOFF") {
                 if(control_qubits_set) {
                     gate[state_iteration][target_toggle] = ComplexNumber(1, 0);
                 }
@@ -73,7 +73,6 @@ namespace Q_Utils {
                     gate[state_iteration][state_iteration] = ComplexNumber(1, 0);
                 }
             }
-
         }
         return gate;
     }

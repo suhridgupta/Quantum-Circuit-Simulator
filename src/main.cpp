@@ -120,6 +120,20 @@ int main() {
                     continue;
                 }
             }
+            if(gate_type == "TOFF") {
+                if(qubit_size < 3) {
+                    cout << "Cannot apply CNOT to this state." << "\n";
+                    continue;
+                }
+                if(control_pos_arr.size() != 2) {
+                    cout << "Incorrect number of control qubits applied, please try again." << "\n";
+                    continue;
+                }
+                if(control_pos == target_pos) {
+                    cout << "Control and Target qubits cannot be the same." << "\n";
+                    continue;
+                }
+            }
             state = Q_Utils::update_state(state, gate_type, target_pos, control_pos, qubit_size, state_size);
         }
         else if(command == "peek") {

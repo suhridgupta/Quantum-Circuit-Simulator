@@ -1,5 +1,6 @@
 # Quantum C++
-Script-based simulation of a quantum computer using C++.
+Script-based simulation of a quantum computer using C++. The implementation currently supports one qubit gates X, Z, Hadamard, two qubit gate CNOT, and the three qubit gate Toffoli.
+The script can be used to simulate simple algorithms such as Deutsch-Josza, Bernstein-Vazirani, Simon, and Grover's. Future work which includes the implementation of custom rotation R gates, as well as other gates such as the Y and Swap gate should allow the implementation of more complex algorithms such as quantum error correction and Fourier transforms.
 
 ## Instructions to run
 make compile && make run
